@@ -36,6 +36,8 @@ public class FrameVisual extends JFrame implements Runnable{
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         for(int i=0;i<FILAS;i++){
           PanelVisual pa=new PanelVisual(i);
+          Thread hiloP=new Thread(pa);
+          hiloP.start();
           panels.add(pa);
           getContentPane().add(pa);
         }

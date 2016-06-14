@@ -9,17 +9,16 @@ package snifer2;
  *
  * @author ELECTRONICA
  */
-public class Snifer2 {
+public class Snifer3 {
 
     /**
      * @param args the command line arguments
      */
-    
     private static CapturaRed capturador=new CapturaRed();
     public static void main(String[] args) {
-        // TODO code application logic here
         capturador.obteneDispo();
         capturador.listarDispositivos();
+        // TODO code application logic here
     }
     
 }
