@@ -115,7 +115,7 @@ public class SubtramaMi implements SubTrama{
      * como un string
      * @return  cadena combertida de byte a enteros
      */
-    @Override
+    
     public String joinHeader(){
         String cad=new String();
         cad=String.format("%01X", start);
@@ -128,7 +128,7 @@ public class SubtramaMi implements SubTrama{
      * retorna el tamaño de la subtrama 
      * @return el tmañao que indica la subtrama
      */
-    @Override
+  
     public int sizePSubtram(){
         String var=new String();
         var=String.format("%02X",size[0]);
@@ -195,7 +195,7 @@ public class SubtramaMi implements SubTrama{
      * tmaaño total de la sutrama
      * @return entero con el tamaño de la subtrama
      */
-    @Override
+    
       public int sizeSub(){
       return size.length+2;
       }
