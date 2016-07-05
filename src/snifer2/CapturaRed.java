@@ -8,6 +8,7 @@ package snifer2;
 
 import java.util.ArrayList;
 import java.util.Date;
+import javax.swing.JOptionPane;
 import org.jnetpcap.*;
 import org.jnetpcap.packet.format.FormatUtils;
 import org.jnetpcap.packet.PcapPacket;
@@ -28,21 +29,22 @@ public class CapturaRed extends Thread{
      */
     private ArrayList<PcapIf> dispositivos;
     private ArrayList<String> disposti;
-    private StringBuilder error=new StringBuilder();
-    private ArrayList packetes;
-    private PcapIf dispositivo=null;
+    private StringBuilder error;
+    private  ArrayList packetes;
+    private PcapIf dispositivo;
     private int ban,tamn;
     private MindrayPacket MP;
     private   boolean band=true;
      private boolean ban2=true;
      private int []vectorGu;
-    private ArrayList<Trama> packets;
+    private  ArrayList<Trama> packets;
     private String ip1;
     
     /**
      * constructor de captura de red
      */
     public CapturaRed() {
+        error=new StringBuilder();
         dispositivos=new ArrayList<PcapIf>();
         disposti=new ArrayList();
         packetes=new ArrayList();
@@ -142,7 +144,7 @@ public class CapturaRed extends Thread{
                 Ip4 ip=new Ip4();
                 
             @Override
-            public void nextPacket(PcapPacket paqute, String user) {
+            public void nextPacket(PcapPacket paqute, String user){
                 ArrayList packetDat=new ArrayList();
                  int auxiliar[]=new int[2];
                  int tama;
@@ -181,7 +183,7 @@ public class CapturaRed extends Thread{
                            packetDat.add(array[i]);
                        }
                        tama=contarPacket(packetDat);
-                       if(tama!=0){
+                       if(tama>0){
                        auxiliar=buscarTamPacket(packetDat);
                         if(auxiliar[0]!=0){
                         band=false;
@@ -216,10 +218,24 @@ public class CapturaRed extends Thread{
                                 }
                            }
                        }else{
-                           if(band==true&&tama!=0){
+                           if(band==true&&tama>0){
                                //System.out.println("SE PASO A CREAR Paquetes");
                                crearPacket(tama, packetDat);
                            }
+                           if(band==true&&tama==0){
+                               tama=contarPacketParam(packetDat);
+                               if(tama>0){
+                               if(buscarTamPacketPar(packetDat)[0]>0){
+                                   JOptionPane.showMessageDialog(null,"paquete incompleto");
+                               }else{
+                                    System.out.println("Los paquetes con parametros son "+tama);
+                                   System.out.println("COMPLETO OOOO ");
+                                   crearPacketParam(tama, packetDat);
+                                 }
+                               }
+                           }
+                           
+                           
                        }
                        //System.out.println("\n cantidad de paquetes en la trama :"+tama);
                        //System.out.println("este es el tmanio del Array :"+packetDat.size());
@@ -230,19 +246,175 @@ public class CapturaRed extends Thread{
                    }else{
                     Thread.yield();
                     }
-                  }    
+                  }
                 }
             };
            pcap.loop(Pcap.LOOP_INFINITE, jpacketHandler, "useiro Yo");
            pcap.close();     
      }
+      
+      
+       /**
+        * 
+        * @param cant
+        * @param datas 
+        */
+       public void crearPacketParam(int cant,ArrayList datas){
+           int pos=0;
+           for(int i=0;i<cant-1&&pos<datas.size();i++){
+           byte []code2=null;
+           Header head=new Header(code2);
+           MindrayParametros mp=new MindrayParametros();
+           mp.setCabeza(head);
+           mp.setFuente(ip1);
+           pos=mp.clasifydata(datas,pos);
+           synchronized(packets){
+               packets.add(mp);
+               packets.notify();
+            }
+           }
+       }
        
-  /**
-   * permite contar los paquetes de red que viajan en una de red capturada
-   * @param array hace referencia a la carga util de la trama TCP
-   * @return el indice de la posicion en la carga util
-   */
-       public int contarPacket(ArrayList array) {
+       
+       
+       
+       
+       /**
+        * 
+        * @return 
+        */
+       public  int[] buscarTamPacketPar(ArrayList datas){
+          String val="15020400";
+        String cad=new String();
+        MindrayParametros Mp1=new MindrayParametros();
+        byte []code2=null;
+        Header head=new Header(code2);
+        Mp1.setCabeza(head);
+        int valor,aux,aux1;
+        int valore[]=new int[2];
+        for(int i=0;i<datas.size();i++){
+            valor=Byte.toUnsignedInt((byte)datas.get(i));
+            if(valor>9){
+               ArrayList lista=descomposeNum(valor);
+                for(int x=lista.size()-1;x>=0;x--){
+                    cad=cad.concat(String.valueOf((int)lista.get(x)));
+                       if(cad.length()==val.length()){
+                   if(cad.equals(val)){
+                       //System.out.println("Exito##&&&////&&&&//&&&&&");
+                      String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       cad=cad1;
+                   }else{
+                       String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       cad=cad1;
+                 }
+               }       
+             }   
+            }else{
+               cad=cad.concat(String.valueOf(Byte.toUnsignedInt((byte)datas.get(i))));
+               if(cad.length()==val.length()){
+                   if(cad.equals(val)){
+                      ((Header)Mp1.getCabeza()).Findsize(i+1, datas);
+                       aux=((Header)Mp1.getCabeza()).sizePacket();
+                       aux1=datas.size()-((i+1)-6);///*/*/*/*/OJO
+                       //System.out.println(aux+" tamanio paquete mas restante tamanio trama "+aux1);
+                       //System.out.println(array.subList((i+1)-6, i).toString());
+                        if(aux>aux1){
+                       valore[0]=aux;
+                       valore[1]=aux1;
+                            //System.out.println(aux+" (aux)tmaaño packete mas (valore[1]) bytes restantes de la trama "+valore[1]);
+                        }
+                        String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       cad=cad1;
+                   }else{
+                       String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       cad=cad1;
+                 }
+               }
+            }
+        }
+       return valore;
+       }
+       
+       
+       
+       
+     
+       /**
+        * 
+        * @param datas
+        * @return 
+        */
+      public int contarPacketParam(ArrayList datas){
+       String val="15020400";
+       String cad=new String();
+        int sali=0,valor;
+        for(int i=0;i<datas.size();i++){ 
+            valor=Byte.toUnsignedInt((byte)datas.get(i));
+            if(valor>9){
+               ArrayList lista=descomposeNum(valor);
+                for(int x=lista.size()-1;x>=0;x--){
+                    cad=cad.concat(String.valueOf((int)lista.get(x)));
+                   if(cad.length()==val.length()){
+                   if(cad.equals(val)){
+                      sali++;
+                      String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       cad=cad1;
+                   }else{
+                       String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       cad=cad1;
+                 }
+               }       
+             }   
+            }else{
+               cad=cad.concat(String.valueOf(Byte.toUnsignedInt((byte)datas.get(i))));
+               if(cad.length()==val.length()){
+                   if(cad.equals(val)){
+                       sali++;
+                       //System.out.println("Exito");
+                        String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       cad=cad1;
+                   }else{
+                       String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       cad=cad1;
+                 }
+               }
+            }
+        }
+       return sali;
+       }
+       
+       
+       
+    /**
+    * permite contar los paquetes de red que viajan en una de red capturada
+    * @param array hace referencia a la carga util de la trama TCP
+    * @return el indice de la posicion en la carga util
+    */
+       public int contarPacket(ArrayList array){
         String val="15015700";
         String cad=new String();
         int sali=0,valor;
@@ -289,7 +461,7 @@ public class CapturaRed extends Thread{
                  }
                }
             }
-        } 
+        }
     return sali;   
     } 
        
@@ -300,7 +472,7 @@ public class CapturaRed extends Thread{
         * @return un array con el tamaño de paquetes y la cantidad de bytes restantes
         * de la carga util.
         */
-    public int[] buscarTamPacket(ArrayList array) {
+    public int[] buscarTamPacket(ArrayList array){
         String val="15015700";
         String cad=new String();
         int valor,aux,aux1;
@@ -402,8 +574,8 @@ public class CapturaRed extends Thread{
      * metodos que retorna los paquetes mindray creados
      * @return un paquete Mindray
      */
-    public MindrayPacket returnPack(){
-        if(packets.size()==0){
+    public Trama returnPack(){
+        if(packets.isEmpty()==true){
             synchronized(packets){
              try{
                 packets.wait();
@@ -413,7 +585,7 @@ public class CapturaRed extends Thread{
                 }
             }
         }
-        MindrayPacket mp1=(MindrayPacket)packets.get(0);
+        Trama mp1= packets.get(0);
         packets.remove(0);
         return mp1;
     }
@@ -489,10 +661,10 @@ public class CapturaRed extends Thread{
     * metodo que re inserta los paquetes en un lista de paquetes creados
      * @param  mp los paquetes MIndray creados
      */
-   public  void insertaPaquete(MindrayPacket mp){
+   public  void insertaPaquete(Trama mp){
        synchronized(packets){
-       packets.notify();
        packets.add(mp);
+       packets.notify();
                }
    }
    
@@ -500,9 +672,5 @@ public class CapturaRed extends Thread{
     public void run() {
         capturarDatosDeRed(dispositivo);
     }
-   
-    
-    
-   
     
 }

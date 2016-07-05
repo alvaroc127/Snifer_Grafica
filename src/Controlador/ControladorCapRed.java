@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import org.jnetpcap.PcapIf;
 import snifer2.CapturaRed;
 import snifer2.MindrayPacket;
+import snifer2.Trama;
 
 /**
  *
@@ -57,7 +58,7 @@ public class ControladorCapRed {
         }
     }
     
-    public synchronized static MindrayPacket Rpacket(){
+    public synchronized static Trama Rpacket(){
     return capr.returnPack();
     }
 
@@ -91,7 +92,7 @@ public class ControladorCapRed {
         capr.start();
     }
     
-    public static void adicionarPacket(MindrayPacket mp){
+    public static void adicionarPacket(Trama mp){
         capr.insertaPaquete(mp);
     }
     

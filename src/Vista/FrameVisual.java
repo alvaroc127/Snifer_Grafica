@@ -8,16 +8,20 @@ package Vista;
 
 
 import Controlador.ControladorCapRed;
-import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import org.jnetpcap.PcapIf;
-import snifer2.CalculadorParametros;
 import snifer2.MindrayPacket;
+import snifer2.MindrayParametros;
+import snifer2.SubTramaArt_AP;
+import snifer2.SubTramaECG;
+import snifer2.SubTramaImpedancia;
+import snifer2.SubTramaSpo2;
+import snifer2.SubtRamTemp;
+import snifer2.Trama;
 
 /**
  *
@@ -28,7 +32,6 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
     private final static int FILAS=8;
     private String ip;
     private ArrayList<PanelVisual> panels;
-    private ArrayList<CalculadorParametros> calPs;
     private JButton btn;
     
     
@@ -40,13 +43,10 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
        getContentPane().setLayout(new GridLayout(FILAS, COLUMNAS));
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         panels=new ArrayList();
-        calPs=new ArrayList();
         for(int i=0;i<FILAS-1;i++){
           PanelVisual pa=new PanelVisual(i);
-          CalculadorParametros cp=new CalculadorParametros();
           pa.setVisible(false);
           panels.add(pa);
-          calPs.add(cp);
           getContentPane().add(pa);
         }
         btn=new JButton("Salida");
@@ -64,20 +64,11 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
         final String h7="2099205";
         final String h8="475251";
         final String h9="73746";
-        if(mp!=null){
         for(int i=0;i<mp.getSubtramas().size();i++){
             //System.out.println("\n valor subtrama :"+mp.getSubtramas().get(i).joinheader());
-            switch(mp.getSubtramas().get(i).joinheader()){
+            switch(mp.getSubtramas().get(i).joinHeader()){
                 case(h1):
-                    panels.get(0).loadGrafic(mp.getSubtramas().get(i).getData());
-                    calPs.get(0).alamacenarlistaDat(mp.getSubtramas().get(i).getData());
-                    calPs.get(0).setValCam(400);
-                    if(calPs.get(0).getListaDat().size()>=1536){
-                       calPs.get(0).generaPrimFiltroDig();
-                      calPs.get(0).getListaDat().clear();
-                       calPs.get(0).getDeltas().clear();
-                    }
-                  panels.get(0).cargaFrecuen(calPs.get(0).getFr());
+                  panels.get(0).loadGrafic(mp.getSubtramas().get(i).getData());
                   panels.get(0).setVisible(true);
                 break;
                         
@@ -99,65 +90,66 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
                     
                 case(h5):
                     panels.get(4).loadGrafic(mp.getSubtramas().get(i).getData());
-                     calPs.get(4).alamacenarlistaDat(mp.getSubtramas().get(i).getData());
-                    calPs.get(4).setValCam(168);
-                    if(calPs.get(4).getListaDat().size()>=1536){
-                       calPs.get(4).generaPrimFiltroDig();
-                       calPs.get(4).buscaMay();
-                      calPs.get(4).getListaDat().clear();
-                       calPs.get(4).getDeltas().clear();
-                    }
-                  panels.get(4).cargarMay(calPs.get(4).getMay());
-                  panels.get(4).cargaFrecuen(calPs.get(4).getFr());
-                  panels.get(4).setVisible(true);
+                    panels.get(4).setVisible(true);
                 break;
             
                 case(h6):
                     panels.get(5).loadGrafic(mp.getSubtramas().get(i).getData());
-                     calPs.get(5).alamacenarlistaDat(mp.getSubtramas().get(i).getData());
-                    //calPs.get(5).setValCam(164);
-                    if(calPs.get(5).getListaDat().size()>=1536){
-                      // calPs.get(5).generaPrimFiltroDig();
-                       calPs.get(5).buscaMay();
-                       calPs.get(5).buscaMen();
-                      calPs.get(5).getListaDat().clear();
-                      //calPs.get(5).getDeltas().clear();
-                    }
-                  panels.get(5).cargarMay(calPs.get(5).getMay());
-                  panels.get(5).cargaMen(calPs.get(5).getMen());
                   panels.get(5).setVisible(true);
                 break;
                     
                 case(h7):
                     panels.get(6).loadGrafic(mp.getSubtramas().get(i).getData());
-                    calPs.get(6).alamacenarlistaDat(mp.getSubtramas().get(i).getData());
-                    if(calPs.get(6).getListaDat().size()>=1536){
-                    calPs.get(6).buscaMay();
-                    calPs.get(6).buscaMen();
-                    calPs.get(6).getListaDat().clear();
-                    //calPs.get(5).getDeltas().clear();
-                    }
-                    panels.get(6).cargaMen(calPs.get(6).getMen());
-                    panels.get(6).cargarMay(calPs.get(6).getMay());
                     panels.get(6).setVisible(true);
-                break; 
-                    
-                case(h8):
-                    panels.get(7).loadGrafic(mp.getSubtramas().get(i).getData());    
-                    break;
-                    
-                  case(h9):
-                    panels.get(8).loadGrafic(mp.getSubtramas().get(i).getData());      
-                   break;
+                break;
                       
                    default: 
                     break;
             }
-            
-        }
     }
- }
+ } 
 
+    
+    public void clasifiParame(MindrayParametros mp){
+     if(mp.getSubtramaParam()!=null){
+    switch(mp.getSubtramaParam().getClass().getSimpleName()){
+                case("SubTramaECG"):
+                panels.get(0).cargaFrecuen(((SubTramaECG)mp.getSubtramaParam()).getFrecuencia());
+                panels.get(0).cargarMatriz(((SubTramaECG)mp.getSubtramaParam()).getI(), ((SubTramaECG)mp.getSubtramaParam()).getII(),((SubTramaECG)mp.getSubtramaParam()).getIII(),((SubTramaECG)mp.getSubtramaParam()).getaVR(),((SubTramaECG)mp.getSubtramaParam()).getaVL(),((SubTramaECG)mp.getSubtramaParam()).getaVF(),((SubTramaECG)mp.getSubtramaParam()).getV(),((SubTramaECG)mp.getSubtramaParam()).getCVP());
+                break;
+                    
+                case("SubTramaImpedancia"):
+                panels.get(3).cargaImpe(((SubTramaImpedancia)mp.getSubtramaParam()).getImpedancia());
+                break;
+        
+                case("SubtRamTemp"):
+               
+                break;
+                  
+                case("SubTramaSpo2"):
+                    panels.get(4).cargarMay(((SubTramaSpo2)mp.getSubtramaParam()).getDato1());
+                  panels.get(4).cargaFrecuen(((SubTramaSpo2)mp.getSubtramaParam()).getFrecuencia());
+                break;    
+                
+                    
+               case("SubTramaArt_AP"):
+                   if(((SubTramaArt_AP)mp.getSubtramaParam()).isBand()){
+                       panels.get(5).cargarMay(((SubTramaArt_AP)mp.getSubtramaParam()).getAlto());
+                        panels.get(5).cargaMen(((SubTramaArt_AP)mp.getSubtramaParam()).getParentesis());
+                   }else{
+                  panels.get(6).cargarMay(((SubTramaArt_AP)mp.getSubtramaParam()).getAlto());
+                  panels.get(6).cargaMen(((SubTramaArt_AP)mp.getSubtramaParam()).getParentesis());
+                   }
+                break;
+                   
+                   
+                case("SubTramaNos"):
+                    
+                break;
+        }
+     }
+    }
+    
     public String getIp() {
         return ip;
     }
@@ -184,16 +176,28 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
     public void run() {
         do{
             //System.out.println("inicio el hilo");
-            MindrayPacket mp= ControladorCapRed.Rpacket();
-            //System.out.println(mp.getFuente());
-            //System.out.println(ip+"la ip");
+            Trama mp= ControladorCapRed.Rpacket();
             if(mp!=null){
-            if(ip.equals(mp.getFuente())){
-                ClasifiData(mp);
+            if(mp.getClass().getSimpleName().equalsIgnoreCase("MindrayPacket")){
+                //System.out.println("pertenece");
+                //System.out.println(mp.getFuente());
+                //System.out.println(ip+"la ip");
+            if(ip.equals(((MindrayPacket)mp).getFuente())){
+               ClasifiData((MindrayPacket)mp);
             }else{
-                ControladorCapRed.adicionarPacket(mp);
-                }
+               ControladorCapRed.adicionarPacket(mp);
+           }
+            }else if(mp.getClass().getSimpleName().equalsIgnoreCase("MindrayParametros")){
+                //System.out.println("pertenece1123443");
+                //System.out.println(mp.getFuente());
+                //System.out.println(ip+"la ip");
+                    if(ip.equals(((MindrayParametros)mp).getFuente())){
+                        clasifiParame((MindrayParametros)mp);
+                    }else{
+                        ControladorCapRed.adicionarPacket(mp);
+                    }
             }
+           }
         }while(true);
     }
 

@@ -21,7 +21,7 @@ public class MindrayPacket implements Trama{
      */
     private String fuente;
     private Header enca;
-    private ArrayList<Subtrama> subtramas;
+    private ArrayList<SubtramaMi> subtramas;
     private int tam;
             
     /**
@@ -41,11 +41,11 @@ public class MindrayPacket implements Trama{
         this.enca = enca;
     }
     
-    public ArrayList<Subtrama> getSubtramas() {
+    public ArrayList<SubtramaMi> getSubtramas() {
         return subtramas;
     }
 
-    public void setSubtramas(ArrayList<Subtrama> subtramas) {
+    public void setSubtramas(ArrayList<SubtramaMi> subtramas) {
         this.subtramas = subtramas;
     }
 
@@ -109,13 +109,13 @@ public class MindrayPacket implements Trama{
     public int cargarSubTram(ArrayList data, int pos) {
         final String h6="2033669";
         final String h7="2099205";
-        Subtrama sub=new Subtrama();
+        SubtramaMi sub=new SubtramaMi();
         pos=sub.findstart(pos, data);
         pos=sub.findSize(pos, data);
         pos=sub.findEndh(pos, data);
         int tama=sub.sizePSubtram();
         //SI cabeza es ECG6 O ECG 7 duplicar la cantidad quelee
-        switch(sub.joinheader()){
+        switch(sub.joinHeader()){
             
         case(h6):
             pos=sub.addData(pos, tama*2, data);

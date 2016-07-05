@@ -9,6 +9,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -36,6 +37,8 @@ public class PanelVisual extends JPanel implements ActionListener{
     private JLabel Mayor;
     private JLabel Men;
     private JPanel pan;
+    private JLabel Impedancia;
+    private JLabel matInd[][];
     private int segundo;
     private int minuto;
     private int hora;
@@ -72,12 +75,26 @@ public class PanelVisual extends JPanel implements ActionListener{
        switch(this.val){
            
         case(0):
+            JPanel pan1=new JPanel();
+            pan=new JPanel();
+            pan.setLayout(new GridLayout(8,1));
+            matInd=new JLabel[8][1];
+            for(int i=0;i<8;i++){
+                    matInd[i][0]=new JLabel();
+//                    matInd[i][j].setText();
+                    matInd[i][0].setFont(new Font("Tahoma", 0,18));
+                    pan.add(matInd[i][0]);
+            }
+            pan1.setLayout(new BorderLayout());
+            pan1.add(pan,BorderLayout.EAST);
             Frecuen=new JLabel();
             Frecuen.setFont(new Font("Tahoma",1,90));
              Frecuen.setForeground(Color.GREEN);
-            add(Frecuen,BorderLayout.EAST);
+            pan1.add(Frecuen,BorderLayout.WEST);
+            //la frecuencia sobre el pan1
             //plot.getRangeAxis().setRange(10,220);
             plot.getRendererForDataset(plot.getDataset(0)).setSeriesPaint(0, Color.GREEN);
+            add(pan1,BorderLayout.EAST);
             add(panelGraf, BorderLayout.CENTER);
         break;
            
@@ -96,8 +113,12 @@ public class PanelVisual extends JPanel implements ActionListener{
             
         case(3):
            // plot.getRangeAxis().setRange(90,190);
+            Impedancia=new JLabel();
+            Impedancia.setFont(new Font("Tahoma",0,70));
+            Impedancia.setForeground(Color.BLACK);
             plot.getRendererForDataset(plot.getDataset(0)).setSeriesPaint(0, Color.yellow);
             add(panelGraf, BorderLayout.CENTER);
+            add(Impedancia,BorderLayout.EAST);
         break;
             
         case(4):
@@ -184,8 +205,8 @@ public class PanelVisual extends JPanel implements ActionListener{
      */
     public void loadGrafic(ArrayList list){
        synchronized(grafica){
-        grafica.notify();
         grafica.addAll(list);
+        grafica.notify();
        }
     }
     
@@ -198,8 +219,8 @@ public class PanelVisual extends JPanel implements ActionListener{
         if(grafica.isEmpty()){
             synchronized(grafica){
                 try{
-                    Thread.yield();
                grafica.wait();
+               Thread.yield();
                 }catch(InterruptedException ie){
                     ie.printStackTrace();
                 }
@@ -323,9 +344,7 @@ public class PanelVisual extends JPanel implements ActionListener{
               resul=getElemnGrafic();
              contSer.advanceTime();//avansa el tiempo     
             contSer.appendData(new float[]{resul});     
-            }else{
-            Thread.yield();
-        }
+               }
             
         break;
             
@@ -340,9 +359,7 @@ public class PanelVisual extends JPanel implements ActionListener{
                 resul=getElemnGrafic();
                 contSer.advanceTime();//avansa el tiempo     
                 contSer.appendData(new float[]{resul});     
-             }else{
-                Thread.yield();
-        }
+             }
             
         break;
             
@@ -359,9 +376,7 @@ public class PanelVisual extends JPanel implements ActionListener{
               resul=getElemnGrafic();
              contSer.advanceTime();//avansa el tiempo     
              contSer.appendData(new float[]{resul});     
-            }else{
-            Thread.yield();
-        }
+            }
             
             
         break;
@@ -377,9 +392,7 @@ public class PanelVisual extends JPanel implements ActionListener{
               resul=getElemnGrafic();
              contSer.advanceTime();//avansa el tiempo     
              contSer.appendData(new float[]{resul});     
-            }else{
-            Thread.yield();
-            }  
+            }
         break;
            
             
@@ -395,6 +408,9 @@ public class PanelVisual extends JPanel implements ActionListener{
              contSer.advanceTime();//avansa el tiempo     
             contSer.appendData(new float[]{resul});     
             }
+               else{
+               Thread.yield();
+               }
         break;
             
         case(6):
@@ -409,45 +425,9 @@ public class PanelVisual extends JPanel implements ActionListener{
               resul=getElemnGrafic()+getElemnGrafic();
              contSer.advanceTime();//avansa el tiempo     
             contSer.appendData(new float[]{resul});     
-            }else{
-            Thread.yield();
-        }
-            
+            }
                 
         break;
-            
-        case(7):
-               if(grafica.isEmpty()==false){
-             int resul;
-            for(int i=0;i<grafica.size()/5;i++){
-               resul=getElemnGrafic();
-             contSer.advanceTime();//avansa el tiempo     
-            contSer.appendData(new float[]{resul});
-                }
-              resul=getElemnGrafic();
-             contSer.advanceTime();//avansa el tiempo     
-            contSer.appendData(new float[]{resul});     
-            }else{
-            Thread.yield();
-        }
-            
-        break;
-            
-       case(8):
-              if(grafica.isEmpty()==false){
-             int resul;
-            for(int i=0;i<grafica.size()/10;i++){
-               resul=getElemnGrafic();
-             contSer.advanceTime();//avansa el tiempo     
-            contSer.appendData(new float[]{resul});
-                }
-              resul=getElemnGrafic();
-             contSer.advanceTime();//avansa el tiempo     
-            contSer.appendData(new float[]{resul});     
-            }else{
-            Thread.yield();
-        }  
-       break;
        }
         
     }
@@ -464,4 +444,18 @@ public class PanelVisual extends JPanel implements ActionListener{
     Men.setText("/"+String.valueOf(men));
     }
     
+    public synchronized void cargaImpe(int impe){
+    Impedancia.setText(String.valueOf(impe));
+    }
+    
+    public synchronized  void cargarMatriz(double I,double II,double III, double aVR,double aVl, double aVF,double V,double CVP){
+        matInd[0][0].setText(String.valueOf(I));
+        matInd[1][0].setText(String.valueOf(II));
+        matInd[2][0].setText(String.valueOf(III));
+        matInd[3][0].setText(String.valueOf(aVR));
+        matInd[4][0].setText(String.valueOf(aVl));
+        matInd[5][0].setText(String.valueOf(aVF));
+        matInd[6][0].setText(String.valueOf(V));
+        matInd[7][0].setText(String.valueOf(CVP));
+    }
 }

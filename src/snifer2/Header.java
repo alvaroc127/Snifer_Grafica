@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * @created 27/05/2016
  * @version 1.0
  */
-public class Header {
+public class Header  implements HeaderIn{
     
     /**
      * Atribute of header
@@ -40,6 +40,30 @@ public class Header {
         conts1=new byte[3];
         code2=new byte[2];
     }
+    
+    public Header(byte []code2) {
+        start=new byte[6];
+        size=new byte[2];
+        Hi_ze=new byte[8];
+        crc=new byte[2];
+        low_zer=new byte[6];
+        code1=new byte[2];
+        conts1=new byte[3];
+        this.code2=code2;
+    }
+
+    public Header(byte[] start, byte[] size, byte[] Hi_ze, byte[] crc, byte[] low_zer, byte[] code1, byte[] conts1, byte[] code2) {
+        this.start = start;
+        this.size = size;
+        this.Hi_ze = Hi_ze;
+        this.crc = crc;
+        this.low_zer = low_zer;
+        this.code1 = code1;
+        this.conts1 = conts1;
+        this.code2 = code2;
+    }
+    
+    
     
     public byte[] getHi_ze() {
         return Hi_ze;
@@ -72,6 +96,75 @@ public class Header {
         this.code2 = code2;
     }
 
+    
+    public  int findStartParam(int post,ArrayList array){
+         String val="15020400";
+        String cad=new String();
+        byte aux[]=new byte[6];
+        boolean ban=true;
+        int sali=-1,pos=0,valor,cont=0;
+        for(int i=post;i<array.size()&&ban==true;i++){
+            valor=Byte.toUnsignedInt((byte)array.get(i));
+            if(pos==6){
+                    pos=pos-1;
+                       for(int a=0;a+1<aux.length;a++){
+                           aux[a]=aux[a+1];
+                            }
+            }
+            aux[pos]= (byte)array.get(i);
+            pos++;
+            if(valor>9){
+               ArrayList lista=descomposeNum(valor);
+                for(int x=lista.size()-1;x>=0;x--){
+                    cad=cad.concat(String.valueOf((int)lista.get(x)));
+                   if(cad.length()==val.length()){
+                   if(cad.equals(val)){
+                       //System.out.println("Exito##&&&////&&&&//&&&&&");
+                       ban=false;
+                       sali=i;
+                       this.start=aux;
+                       //cargar el resto de segmentos de cabezera
+                   }else{
+                       String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       if(pos==6){
+                           pos=pos-1;
+                       for(int a=0;a+1<aux.length;a++){
+                           aux[a]=aux[a+1];
+                            }
+                       }
+                       cad=cad1;
+                 }
+               }       
+             }   
+            }else{
+               cad=cad.concat(String.valueOf(Byte.toUnsignedInt((byte)array.get(i))));
+               if(cad.length()==val.length()){
+                   if(cad.equals(val)){
+                       ban=false;
+                       sali=i;
+                       this.start=aux;
+                       //System.out.println("Exito");
+                   }else{
+                       String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                        if(pos==6){
+                           pos=pos-1;
+                       for(int a=0;a+1<aux.length;a++){
+                           aux[a]=aux[a+1];
+                                }
+                            }
+                       cad=cad1;
+                 }
+               }
+            }
+        }
+    return sali;
+       }
     
     /**
      * This method return arrayList witch, the number descompose in untis.
@@ -272,18 +365,24 @@ public class Header {
      */
     
     public int FindCode2(int pos,ArrayList array){
+        if(code2.length==2){
         this.code2[0]=(byte)array.get(++pos);
         this.code2[1]=(byte)array.get(++pos);
+        }else{
+            this.code2[0]=(byte)array.get(++pos);
+            this.code2[1]=(byte)array.get(++pos);
+            this.code2[2]=(byte)array.get(++pos);
+        }
         //System.out.printf("0x%02X",code2[0]);
         //System.out.println("");
         //System.out.printf("0x%02X",code2[1]);
     return pos;
     }
-    
     /**
      * retorna el tamaño de un paquete de datos
      * @return un entero con el tamaño del paquete
      */
+    @Override
     public int sizePacket(){
         String var=new String();
         var=String.format("%02X",size[0]);
@@ -291,6 +390,14 @@ public class Header {
         return Integer.parseInt(var, 16);
     }
     
+    
+    
+    public int joinCrc(){
+    String var=new String();
+        var=String.format("%02X",crc[0]);
+        var=var.concat(String.format("%02X",crc[1]));
+        return Integer.parseInt(var, 16);
+    }
     /**
      *
      * 
@@ -405,7 +512,9 @@ public class Header {
     mostrarLowZero();
     mostrarCode1();
     mostrarConst();
+    if(code2!=null){
     mostrarCode2();
+        }
     }
     
     
