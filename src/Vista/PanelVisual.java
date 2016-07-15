@@ -39,6 +39,7 @@ public class PanelVisual extends JPanel implements ActionListener{
     private JPanel pan;
     private JLabel Impedancia;
     private JLabel matInd[][];
+    private JLabel matMayMenPa[][];
     private int segundo;
     private int minuto;
     private int hora;
@@ -156,13 +157,26 @@ public class PanelVisual extends JPanel implements ActionListener{
         XYLineAndShapeRenderer render1=(XYLineAndShapeRenderer)plot1.getRenderer();
          ChartPanel panelGraf1=new ChartPanel(gaficaTiempo);
             pan=new JPanel();
-            pan.setLayout(new BorderLayout());
-            Mayor=new JLabel();
-            Men=new JLabel();
-            Mayor.setFont(new Font("Tahoma",1,90));
-            Men.setFont(new Font("Tahoma",1,50));
-            pan.add(Mayor,BorderLayout.WEST);
-            pan.add(Men, BorderLayout.EAST);
+            pan.setLayout(new GridLayout(1, 3));
+            matMayMenPa=new JLabel[1][3];
+            for(int i=0;i<3;i++){
+            matMayMenPa[0][i]=new JLabel();
+             if(i==0){
+            matMayMenPa[0][i].setFont(new Font("Tahoma",0,70));
+            }
+            if(i==1){
+            matMayMenPa[0][i].setFont(new Font("Tahoma",0,50));
+            }
+            if(i==2){
+            matMayMenPa[0][i].setFont(new Font("Tahoma",0,30));
+            }
+            pan.add(matMayMenPa[0][i]);
+            }
+            //pan.setLayout(new BorderLayout());
+            //Mayor.setFont(new Font("Tahoma",1,90));
+            //Men.setFont(new Font("Tahoma",1,50));
+            //pan.add(Mayor,BorderLayout.WEST);
+            //pan.add(Men, BorderLayout.EAST);
            // plot.getRangeAxis().setRange(0,220);
             plot1.getRendererForDataset(plot1.getDataset(0)).setSeriesPaint(0, Color.RED);
             add(panelGraf1, BorderLayout.CENTER);
@@ -171,13 +185,28 @@ public class PanelVisual extends JPanel implements ActionListener{
             
         case(6):
             pan=new JPanel();
-            pan.setLayout(new BorderLayout());
-            Mayor=new JLabel();
-            Men=new JLabel("-");
-            Mayor.setFont(new Font("Tahoma",1,90));
-            Men.setFont(new Font("Tahome",1,50));
-            pan.add(Mayor,BorderLayout.WEST);
-            pan.add(Men,BorderLayout.EAST);
+             pan.setLayout(new GridLayout(1, 3));
+            matMayMenPa=new JLabel[1][3];
+            for(int i=0;i<3;i++){
+            matMayMenPa[0][i]=new JLabel();
+            if(i==0){
+            matMayMenPa[0][i].setFont(new Font("Tahoma",0,70));
+            }
+            if(i==1){
+            matMayMenPa[0][i].setFont(new Font("Tahoma",0,50));
+            }
+            if(i==2){
+            matMayMenPa[0][i].setFont(new Font("Tahoma",0,30));
+            }
+            pan.add(matMayMenPa[0][i]);
+            }
+            //pan.setLayout(new BorderLayout());
+            //Mayor=new JLabel();
+            //Men=new JLabel("-");
+            //Mayor.setFont(new Font("Tahoma",1,90));
+            //Men.setFont(new Font("Tahome",1,50));
+            //pan.add(Mayor,BorderLayout.WEST);
+            //pan.add(Men,BorderLayout.EAST);
             //plot.getRangeAxis().setRange(0,35);
             plot.getRendererForDataset(plot.getDataset(0)).setSeriesPaint(0, Color.YELLOW);
             add(panelGraf, BorderLayout.CENTER); 
@@ -457,5 +486,11 @@ public class PanelVisual extends JPanel implements ActionListener{
         matInd[5][0].setText(String.valueOf(aVF));
         matInd[6][0].setText(String.valueOf(V));
         matInd[7][0].setText(String.valueOf(CVP));
+    }
+    
+    public synchronized void cargaAltoBajoParen(int alto,int bajo,int parentesis){    
+        matMayMenPa[0][0].setText(String.valueOf(alto));
+        matMayMenPa[0][1].setText("/"+String.valueOf(bajo));
+        matMayMenPa[0][2].setText("("+String.valueOf(parentesis)+")");
     }
 }

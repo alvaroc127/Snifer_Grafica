@@ -18,29 +18,29 @@ import java.sql.SQLException;
  */
 public class Conecxion {
     
-    private final  String user="user=;";
-    private final String contrasenia="password=;";
-    private final String JDBC_driver="com.microsoft.sqlserver.jdbc.SQLServerDriver";
+    private static  String user="pasante1";
+    private static String contrasenia="sebastian";
+    private static final String JDBC_driver="com.microsoft.sqlserver.jdbc.SQLServerDriver";
     private static Driver driver;
-    private final String db="databaseName= ;";
-    private final String url_JDBC="jdbc:sqlserver://localhost:1443;"+db+user+contrasenia;
-    
+    private static  String db="databaseName=FUCS";
+    private static final String url_JDBC="jdbc:sqlserver://JAVIERCASASUC;"+db;
     
     public Conecxion(){
     
     }
     
     
-    public synchronized Connection  conecxion() throws SQLException{
+    public static  synchronized Connection  getConecxion() throws SQLException{
         if(driver==null){
             try{
                 Class JdbcDriverClass=Class.forName(JDBC_driver);
                 driver= (Driver) JdbcDriverClass.newInstance(); 
             }catch(Exception ex){
+                System.err.println("errorororoor");
             ex.printStackTrace();
             }
         }
-    return DriverManager.getConnection(url_JDBC);
+    return DriverManager.getConnection(url_JDBC,user,contrasenia);
     }
     
     

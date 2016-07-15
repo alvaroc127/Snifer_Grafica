@@ -6,8 +6,12 @@
 package snifer2;
 
 
-import java.util.ArrayList;
+import java.time.Clock;
 import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import javafx.util.converter.LocalDateTimeStringConverter;
 import javax.swing.JOptionPane;
 import org.jnetpcap.*;
 import org.jnetpcap.packet.format.FormatUtils;
@@ -15,6 +19,7 @@ import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
 import org.jnetpcap.protocol.network.Ip4;
 import org.jnetpcap.protocol.tcpip.Tcp;
+
 
 
 /**
@@ -36,9 +41,12 @@ public class CapturaRed extends Thread{
     private MindrayPacket MP;
     private   boolean band=true;
      private boolean ban2=true;
+     private boolean band2Pa=true;
      private int []vectorGu;
     private  ArrayList<Trama> packets;
     private String ip1;
+    private  LocalDate fecha;
+    private LocalTime Hora;
     
     /**
      * constructor de captura de red
@@ -53,7 +61,14 @@ public class CapturaRed extends Thread{
         packets=new ArrayList();
         ip1=null;
     }
-    
+
+    public ArrayList<Trama> getPackets() {
+        return packets;
+    }
+
+    public void setPackets(ArrayList<Trama> packets) {
+        this.packets = packets;
+    }
     
      public ArrayList<PcapIf> getDispositivos() {
         return dispositivos;
@@ -70,6 +85,15 @@ public class CapturaRed extends Thread{
     public void setDispositivo(PcapIf dispositivo) {
         this.dispositivo = dispositivo;
     }
+
+    public boolean isBand2Pa() {
+        return band2Pa;
+    }
+
+    public void setBand2Pa(boolean band2Pa) {
+        this.band2Pa = band2Pa;
+    }
+    
     
     
     
@@ -148,6 +172,7 @@ public class CapturaRed extends Thread{
                 ArrayList packetDat=new ArrayList();
                  int auxiliar[]=new int[2];
                  int tama;
+                 int cont = 0;
                  ip1="";
                  
                  byte []dip=new byte[4],fip=new byte[4];
@@ -172,7 +197,6 @@ public class CapturaRed extends Thread{
                        //JBuffer buffer= paqute;
                        if(TCP.getPayloadLength()!=0){
                        byte array[]=TCP.getPayload();
-                       
                        System.out.println("fuente :"+TCP.source());
                        System.out.println("Destinio :"+TCP.destination());
                        System.out.println("Paquetes recibido el: "+new Date(paqute.getCaptureHeader().timestampInMillis()));
@@ -228,14 +252,21 @@ public class CapturaRed extends Thread{
                                if(buscarTamPacketPar(packetDat)[0]>0){
                                    JOptionPane.showMessageDialog(null,"paquete incompleto");
                                }else{
-                                    System.out.println("Los paquetes con parametros son "+tama);
+                                   System.out.println("Los paquetes con parametros son "+tama);
                                    System.out.println("COMPLETO OOOO ");
+                                   if(packets.isEmpty()==false){
+                                       if(ip1.equals(((MindrayParametros)packets.get(0)).getFuente())){
+                                       band2Pa=true;
+                                       }else{
+                                       band2Pa=false;
+                                       }
+                                   }else{
+                                   band2Pa=true;
+                                   }
                                    crearPacketParam(tama, packetDat);
                                  }
                                }
-                           }
-                           
-                           
+                           }  
                        }
                        //System.out.println("\n cantidad de paquetes en la trama :"+tama);
                        //System.out.println("este es el tmanio del Array :"+packetDat.size());
@@ -254,6 +285,12 @@ public class CapturaRed extends Thread{
      }
       
       
+       
+       
+       
+       
+       
+       
        /**
         * 
         * @param cant
@@ -263,20 +300,34 @@ public class CapturaRed extends Thread{
            int pos=0;
            for(int i=0;i<cant-1&&pos<datas.size();i++){
            byte []code2=null;
+           if(i==0){
+               Clock clo=Clock.systemUTC();
+           Hora=LocalTime.now(clo);
+           fecha=LocalDate.now();
+           }
            Header head=new Header(code2);
            MindrayParametros mp=new MindrayParametros();
+           mp.setFecha(fecha);
+           mp.setHora(Hora);
            mp.setCabeza(head);
            mp.setFuente(ip1);
            pos=mp.clasifydata(datas,pos);
-           synchronized(packets){
-               packets.add(mp);
-               packets.notify();
-            }
+           packets.add(mp);
            }
        }
        
+       /**
+        * 
+        */
+       public int contarAlarmPacket(){
+       String val="15020400";
+       String val1="1503800";
+       String val2="1503600";
+       String cad=new String();
        
        
+       return 0;
+       }
        
        
        /**
@@ -555,39 +606,45 @@ public class CapturaRed extends Thread{
      * @param datas son la carga util del fragmento TCP
      * @return una lsita de los paquetes creados
      */
-    public ArrayList<Trama> crearPacket(int numPackets,ArrayList datas){
+    public void crearPacket(int numPackets,ArrayList datas){
     int pos=0;
+    if(isParametros()){
     for(int i=0;i<numPackets;i++){
         MindrayPacket packt=new MindrayPacket();
         packt.setFuente(ip1);
+        if(fecha!=null&&Hora!=null){
+        packt.setFecha(fecha);
+        packt.setHora(Hora);
+        }
         pos=packt.clasifydata(datas,pos);
-        synchronized(packets){
-            packets.add(packt);
-            packets.notify();
-            System.out.println("cabezas creadas "+packets.size());
+        packets.add(packt);
+        System.out.println("cabezas creadas "+packets.size());
             }
         }
-    return packets;
     }
     
     /**
      * metodos que retorna los paquetes mindray creados
      * @return un paquete Mindray
      */
-    public Trama returnPack(){
-        if(packets.isEmpty()==true){
-            synchronized(packets){
-             try{
-                packets.wait();
-                Thread.yield();
-                }catch(InterruptedException ie){
-                ie.printStackTrace();
-                }
-            }
+    public ArrayList<Trama> returnPack(){
+        if(band2Pa==true){
+        return packets;
+        }else{
+            return null;
         }
-        Trama mp1= packets.get(0);
-        packets.remove(0);
-        return mp1;
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public Trama packetValida(){
+     if(packets.isEmpty()==false){
+            return packets.get(0);
+        }else{
+     return null;
+     }
     }
     
     
@@ -668,9 +725,31 @@ public class CapturaRed extends Thread{
                }
    }
    
+   
+   /**
+    * 
+    */
     @Override
     public void run() {
         capturarDatosDeRed(dispositivo);
+    }
+    
+    
+    /**
+     * 
+     * 
+     * @return 
+     */
+    public boolean  isParametros(){
+        if(packets.isEmpty()){
+        return false;
+        }else {
+        if((packets.isEmpty()==false&& packets.get(0).getClass().getSimpleName().equals("MindrayParametros"))){
+            return true;
+            }else{
+            return false;
+            }
+        }
     }
     
 }

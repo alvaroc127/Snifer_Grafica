@@ -33,7 +33,7 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
     private String ip;
     private ArrayList<PanelVisual> panels;
     private JButton btn;
-    
+    private ControladorCapRed cpr;
     
  
 
@@ -70,6 +70,7 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
                 case(h1):
                   panels.get(0).loadGrafic(mp.getSubtramas().get(i).getData());
                   panels.get(0).setVisible(true);
+                  //ControladorCapRed.inserBaseDat(001,mp.getSubtramas().get(i).combertByte(), mp.getSubtramas().get(i+1).combertByte(), mp.getSubtramas().get(i+2).combertByte());
                 break;
                         
                 case(h2):
@@ -127,18 +128,16 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
                 break;
                   
                 case("SubTramaSpo2"):
-                    panels.get(4).cargarMay(((SubTramaSpo2)mp.getSubtramaParam()).getDato1());
+                  panels.get(4).cargarMay(((SubTramaSpo2)mp.getSubtramaParam()).getDato1());
                   panels.get(4).cargaFrecuen(((SubTramaSpo2)mp.getSubtramaParam()).getFrecuencia());
                 break;    
                 
                     
                case("SubTramaArt_AP"):
                    if(((SubTramaArt_AP)mp.getSubtramaParam()).isBand()){
-                       panels.get(5).cargarMay(((SubTramaArt_AP)mp.getSubtramaParam()).getAlto());
-                        panels.get(5).cargaMen(((SubTramaArt_AP)mp.getSubtramaParam()).getParentesis());
+                        panels.get(5).cargaAltoBajoParen(((SubTramaArt_AP)mp.getSubtramaParam()).getAlto(),((SubTramaArt_AP)mp.getSubtramaParam()).getParentesis(),((SubTramaArt_AP)mp.getSubtramaParam()).getBajo());
                    }else{
-                  panels.get(6).cargarMay(((SubTramaArt_AP)mp.getSubtramaParam()).getAlto());
-                  panels.get(6).cargaMen(((SubTramaArt_AP)mp.getSubtramaParam()).getParentesis());
+                  panels.get(6).cargaAltoBajoParen(((SubTramaArt_AP)mp.getSubtramaParam()).getAlto(),((SubTramaArt_AP)mp.getSubtramaParam()).getParentesis(),((SubTramaArt_AP)mp.getSubtramaParam()).getBajo());
                    }
                 break;
                    
@@ -166,38 +165,49 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
         this.panels = panels;
     }
 
-   
-    
-    
-    
-    
+    public ControladorCapRed getCpr() {
+        return cpr;
+    }
+
+    public void setCpr(ControladorCapRed cpr) {
+        this.cpr = cpr;
+    }
     
     @Override
     public void run() {
         do{
+            if(cpr!=null && ip!=null){
+            if(cpr.isIp(ip)){
+                ArrayList<Trama> tram=ControladorCapRed.Rpacket();
+                if(tram!=null){
+                 for(int i=0;i<tram.size();i++){
+                //validar que tram diferente de NULL
             //System.out.println("inicio el hilo");
-            Trama mp= ControladorCapRed.Rpacket();
+            Trama mp= tram.get(i);//ControladorCapRed.Rpacket();
             if(mp!=null){
             if(mp.getClass().getSimpleName().equalsIgnoreCase("MindrayPacket")){
                 //System.out.println("pertenece");
                 //System.out.println(mp.getFuente());
                 //System.out.println(ip+"la ip");
-            if(ip.equals(((MindrayPacket)mp).getFuente())){
                ClasifiData((MindrayPacket)mp);
-            }else{
-               ControladorCapRed.adicionarPacket(mp);
-           }
             }else if(mp.getClass().getSimpleName().equalsIgnoreCase("MindrayParametros")){
                 //System.out.println("pertenece1123443");
                 //System.out.println(mp.getFuente());
                 //System.out.println(ip+"la ip");
-                    if(ip.equals(((MindrayParametros)mp).getFuente())){
-                        clasifiParame((MindrayParametros)mp);
-                    }else{
-                        ControladorCapRed.adicionarPacket(mp);
-                    }
+                clasifiParame((MindrayParametros)mp);
+                }
+              }
             }
-           }
+           }else{
+                    System.out.println("----tram---"+tram);
+                }
+          }else{
+            System.out.println(" NO"   + ")(()()(Entro/*-**/--*/");
+            }
+          }else{
+                System.out.println("cpr o ip son null/*/*/*/*/*/*/");
+                System.out.println(cpr+"%%&%&%&%&%&%&%&%&% esto es Ip "+ip);
+            }
         }while(true);
     }
 

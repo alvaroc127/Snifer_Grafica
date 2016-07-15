@@ -5,10 +5,12 @@
  */
 package Controlador;
 
+import BD.ECG_JDBC;
 import java.util.ArrayList;
 import org.jnetpcap.PcapIf;
 import snifer2.CapturaRed;
 import snifer2.MindrayPacket;
+import snifer2.MindrayParametros;
 import snifer2.Trama;
 
 /**
@@ -20,9 +22,12 @@ public class ControladorCapRed {
     private static CapturaRed capr;
     private ArrayList<String> Ips;
     private ArrayList<String> dispostiRed;
+    private static ECG_JDBC ecg_db;
+    private Trama packet;
 
     public ControladorCapRed(){
         capr=new CapturaRed();
+        ecg_db=new ECG_JDBC();
         //capr.obteneDispo();
         //capr.listarDispositivos();
         //capr.start();
@@ -58,10 +63,14 @@ public class ControladorCapRed {
         }
     }
     
-    public synchronized static Trama Rpacket(){
-    return capr.returnPack();
+    public synchronized static ArrayList<Trama> Rpacket(){
+        ArrayList<Trama> trm=capr.returnPack();
+        if(trm!=null){
+         capr.getPackets().clear();
+        }
+    return trm;
     }
-
+    
     public ControladorCapRed(CapturaRed capr, ArrayList<String> Ips) {
         this.capr = capr;
         this.Ips = Ips;
@@ -96,4 +105,27 @@ public class ControladorCapRed {
         capr.insertaPaquete(mp);
     }
     
+    public void insertarDataBase(int ID_Indicador,float aVR,float aVL,int Frec_Cardi,float I,float II,float III,float V, byte[] ECG1,byte[] ECG2,byte[] ECG3,float Voltaje_aVR,float Voltaje_aVL){
+    ecg_db.insertarSeñal(ID_Indicador, aVR, aVL, Frec_Cardi, I, II, III, V, ECG1, ECG2, ECG3, Voltaje_aVR, Voltaje_aVL);
+    }
+    
+    
+    public static void inserBaseDat(int ide,byte[] ECG1,byte[] ECG2,byte[] ECG3){
+    ecg_db.insertarSe(ide, ECG1, ECG2, ECG3);
+    }
+    
+    
+    public void loadPacket(){
+    packet=capr.packetValida();
+    }
+    
+    public synchronized boolean isIp(String ip){
+    loadPacket();
+    if(packet!= null&&packet.getClass().getSimpleName().equals("MindrayParametros")&&ip.equals(((MindrayParametros)packet).getFuente())){
+        return true;
+    }else{
+    return false;
+     }
+    }
 }
+

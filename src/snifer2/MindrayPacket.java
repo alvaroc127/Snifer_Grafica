@@ -6,6 +6,8 @@
 package snifer2;
 
 import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 /**
  * class mindray Packet, this is a references of model packet mindray from conection,
@@ -23,6 +25,8 @@ public class MindrayPacket implements Trama{
     private Header enca;
     private ArrayList<SubtramaMi> subtramas;
     private int tam;
+    private LocalDate fecha;
+    private LocalTime hora;
             
     /**
      * Constructor overload
@@ -40,6 +44,8 @@ public class MindrayPacket implements Trama{
     public void setEnca(Header enca) {
         this.enca = enca;
     }
+
+
     
     public ArrayList<SubtramaMi> getSubtramas() {
         return subtramas;
@@ -65,6 +71,24 @@ public class MindrayPacket implements Trama{
         this.tam = tam;
     }
 
+    public LocalDate getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(LocalDate fecha) {
+        this.fecha = fecha;
+    }
+
+    public LocalTime getHora() {
+        return hora;
+    }
+
+    public void setHora(LocalTime hora) {
+        this.hora = hora;
+    }
+
+    
+    
     
       
     /**

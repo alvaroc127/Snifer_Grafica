@@ -18,7 +18,7 @@ import javax.swing.Timer;
  */
 public class PrincipalPre extends javax.swing.JFrame implements ActionListener{
     
-    private ControladorCapRed ccapR;
+    private  ControladorCapRed ccapR;
     private ArrayList<FrameVisual> frames;
     private Timer temp;
     /**
@@ -157,6 +157,7 @@ public class PrincipalPre extends javax.swing.JFrame implements ActionListener{
             FrameVisual frv=new FrameVisual((String)jListaIps.getSelectedValue());
             Thread hilo=new Thread(frv);
             hilo.setPriority(Thread.MAX_PRIORITY);
+            frv.setCpr(ccapR);
             hilo.start();
             frv.setVisible(true);
             frames.add(frv);

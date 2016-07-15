@@ -5,7 +5,10 @@
  */
 package snifer2;
 
+import java.time.LocalTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
+
 
 /**
  *
@@ -16,10 +19,14 @@ public class MindrayParametros implements Trama{
     private String fuente;
     private HeaderIn cabeza;
     private SubTraMetod SubtramaParam;
+    private LocalDate fecha;
+    private LocalTime hora;
+    
 
     public MindrayParametros(Header cabeza, SubTraMetod SubTramaParam) {
         this.cabeza = cabeza;
         this.SubtramaParam = SubTramaParam;
+        
     }
 
     public MindrayParametros(HeaderIn cabeza, SubTraMetod SubTramaParam) {
@@ -41,6 +48,23 @@ public class MindrayParametros implements Trama{
     
     }
 
+    public LocalTime getHora() {
+        return hora;
+    }
+
+    public void setHora(LocalTime hora) {
+        this.hora = hora;
+    }
+
+
+    public LocalDate getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(LocalDate fecha) {
+        this.fecha = fecha;
+    }    
+    
     public HeaderIn getCabeza() {
         return cabeza;
     }
@@ -165,6 +189,12 @@ public class MindrayParametros implements Trama{
         var=var.concat(String.format("%02X", (byte)data.get(++pos)));
         //System.out.println("#$$$$%%%$$########"+var);
         return Integer.parseInt(var,16);
+    }
+    
+    
+    public void printDate(){
+        System.out.println(hora.toString());
+        System.out.println(fecha.toString());
     }
     
 }

@@ -7,6 +7,7 @@ package snifer2;
 
 import java.util.ArrayList;
 
+
 /**
  * this class is a references to datas fron  trama
  * @author UCDIT
@@ -200,11 +201,18 @@ public class SubtramaMi implements SubTrama{
       return size.length+2;
       }
       
+      
       /**
        * 
        * 
        */
-      
+      public byte[] combertByte(){
+          byte[] a=new byte[data.size()];
+          for(int i=0;i<data.size();i++){
+            a[i]=(byte)data.get(i);
+          }
+          return a;
+    }
     
 
 }
