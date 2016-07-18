@@ -176,14 +176,14 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
     @Override
     public void run() {
         do{
-            if(cpr!=null && ip!=null){
-            if(cpr.isIp(ip)){
-                ArrayList<Trama> tram=ControladorCapRed.Rpacket();
-                if(tram!=null){
-                 for(int i=0;i<tram.size();i++){
+            //if(cpr!=null && ip!=null){
+            //if(cpr.isIp(ip)){
+               Trama mp=ControladorCapRed.Rpacket();
+                if(mp!=null){
+                // for(int i=0;i<tram.size();i++){
                 //validar que tram diferente de NULL
             //System.out.println("inicio el hilo");
-            Trama mp= tram.get(i);//ControladorCapRed.Rpacket();
+            //Trama mp= tram.get(i);//ControladorCapRed.Rpacket();
             if(mp!=null){
             if(mp.getClass().getSimpleName().equalsIgnoreCase("MindrayPacket")){
                 //System.out.println("pertenece");
@@ -196,18 +196,18 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
                 //System.out.println(ip+"la ip");
                 clasifiParame((MindrayParametros)mp);
                 }
-              }
+              //}
             }
            }else{
-                    System.out.println("----tram---"+tram);
+                    System.out.println("----tram---"+mp);
                 }
-          }else{
-            System.out.println(" NO"   + ")(()()(Entro/*-**/--*/");
-            }
-          }else{
-                System.out.println("cpr o ip son null/*/*/*/*/*/*/");
-                System.out.println(cpr+"%%&%&%&%&%&%&%&%&% esto es Ip "+ip);
-            }
+          //}else{
+            //System.out.println(" NO"   + ")(()()(Entro/*-**/--*/");
+            //}
+         // }else{
+              //  System.out.println("cpr o ip son null/*/*/*/*/*/*/");
+               // System.out.println(cpr+"%%&%&%&%&%&%&%&%&% esto es Ip "+ip);
+           // }
         }while(true);
     }
 

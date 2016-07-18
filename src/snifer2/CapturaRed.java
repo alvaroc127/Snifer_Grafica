@@ -254,15 +254,15 @@ public class CapturaRed extends Thread{
                                }else{
                                    System.out.println("Los paquetes con parametros son "+tama);
                                    System.out.println("COMPLETO OOOO ");
-                                   if(packets.isEmpty()==false){
-                                       if(ip1.equals(((MindrayParametros)packets.get(0)).getFuente())){
-                                       band2Pa=true;
-                                       }else{
-                                       band2Pa=false;
-                                       }
-                                   }else{
-                                   band2Pa=true;
-                                   }
+                                   //if(packets.isEmpty()==false){
+                                       //if(ip1.equals(((MindrayParametros)packets.get(0)).getFuente())){
+                                       //band2Pa=true;
+                                      // }else{
+                                       //band2Pa=false;
+                                       //}
+                                   //}else{
+                                   //band2Pa=true;
+                                   //}
                                    crearPacketParam(tama, packetDat);
                                  }
                                }
@@ -312,7 +312,10 @@ public class CapturaRed extends Thread{
            mp.setCabeza(head);
            mp.setFuente(ip1);
            pos=mp.clasifydata(datas,pos);
+           synchronized(packets){
            packets.add(mp);
+           packets.notify();
+            }
            }
        }
        
@@ -608,7 +611,7 @@ public class CapturaRed extends Thread{
      */
     public void crearPacket(int numPackets,ArrayList datas){
     int pos=0;
-    if(isParametros()){
+    //if(isParametros()){
     for(int i=0;i<numPackets;i++){
         MindrayPacket packt=new MindrayPacket();
         packt.setFuente(ip1);
@@ -617,22 +620,33 @@ public class CapturaRed extends Thread{
         packt.setHora(Hora);
         }
         pos=packt.clasifydata(datas,pos);
+        synchronized(packets){
         packets.add(packt);
+        packets.notify();
+        }
         System.out.println("cabezas creadas "+packets.size());
             }
-        }
+        //}
     }
     
     /**
      * metodos que retorna los paquetes mindray creados
      * @return un paquete Mindray
      */
-    public ArrayList<Trama> returnPack(){
-        if(band2Pa==true){
-        return packets;
-        }else{
-            return null;
+    public  Trama returnPack(){
+        Trama pm=null;
+        if(packets.isEmpty()){
+            synchronized(packets){
+            try{
+            packets.wait();
+            }catch(InterruptedException eic){
+            eic.printStackTrace();
+            }
+            }
         }
+        pm=packets.get(0);
+        packets.remove(0);
+        return pm;
     }
     
     /**

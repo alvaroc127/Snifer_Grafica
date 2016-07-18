@@ -63,12 +63,12 @@ public class ControladorCapRed {
         }
     }
     
-    public synchronized static ArrayList<Trama> Rpacket(){
-        ArrayList<Trama> trm=capr.returnPack();
-        if(trm!=null){
-         capr.getPackets().clear();
-        }
-    return trm;
+    public synchronized static Trama Rpacket(){
+       // ArrayList<Trama> trm=capr.returnPack();
+        //if(trm!=null){
+         //capr.getPackets().clear();
+        //}
+    return capr.returnPack();
     }
     
     public ControladorCapRed(CapturaRed capr, ArrayList<String> Ips) {
