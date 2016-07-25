@@ -101,7 +101,7 @@ public class SubTramaParam implements SubTrama{
                 ((SubTramaECG)retor).setStart(start);
                 ((SubTramaECG)retor).setSize(size);
                 ((SubTramaECG)retor).setEnd(end);
-                System.out.println("ESTA EN ECG");
+                //System.out.println("ESTA EN ECG");
                 break;
                 
             case 1114117:
@@ -109,7 +109,7 @@ public class SubTramaParam implements SubTrama{
                 ((SubTramaImpedancia)retor).setStart(start);
                 ((SubTramaImpedancia)retor).setSize(size);
                 ((SubTramaImpedancia)retor).setEnd(end);
-                System.out.println("ESTA EN impedancia");
+                //System.out.println("ESTA EN impedancia");
                 break;
                 
             case 2294026:
@@ -117,7 +117,7 @@ public class SubTramaParam implements SubTrama{
                 ((SubtRamTemp)retor).setStart(start);
                 ((SubtRamTemp)retor).setSize(size);
                 ((SubtRamTemp)retor).setEnd(end);
-                System.out.println("ESTA EN Temp");
+               // System.out.println("ESTA EN Temp");
                 break;
                 
             case 1179653:
@@ -125,7 +125,7 @@ public class SubTramaParam implements SubTrama{
                 ((SubTramaSpo2)retor).setStart(start);
                 ((SubTramaSpo2)retor).setSize(size);
                 ((SubTramaSpo2)retor).setEnd(end);
-                  System.out.println("ESTA EN Temp");
+                 // System.out.println("ESTA EN Temp");
                 break;
                 
             case 13107205:
@@ -133,7 +133,7 @@ public class SubTramaParam implements SubTrama{
                 ((SubTramaNos)retor).setStart(start);
                 ((SubTramaNos)retor).setSize(size);
                 ((SubTramaNos)retor).setEnd(end);
-                System.out.println("ESTA EN nos");
+                //System.out.println("ESTA EN nos");
                 break;
                 
             case  8454149:
@@ -141,7 +141,7 @@ public class SubTramaParam implements SubTrama{
                 ((SubTramaArt_AP)retor).setStart(start);
                 ((SubTramaArt_AP)retor).setSize(size);
                 ((SubTramaArt_AP)retor).setEnd(end);
-                System.out.println("ESTA EN ART");
+                //System.out.println("ESTA EN ART");
                 break;
                 
             case 8650757:
@@ -149,11 +149,11 @@ public class SubTramaParam implements SubTrama{
                 ((SubTramaArt_AP)retor).setStart(start);
                 ((SubTramaArt_AP)retor).setSize(size);
                 ((SubTramaArt_AP)retor).setEnd(end);
-                System.out.println("ESTA EN AP");
+                //System.out.println("ESTA EN AP");
                 break;
                 
                default:
-                   System.out.println("NADAN DAD");
+                  // System.out.println("NADAN DAD");
                   break;
                 
         }
@@ -183,6 +183,17 @@ public class SubTramaParam implements SubTrama{
     }
     
     
+    public void printData(){
+        for(int j=0;j<datas.size();j++){
+           System.out.printf("0x%02X",datas.get(j));
+        }
+        System.out.println("--------------");
+    }
+    
+    
+    
+     
+   
     
     public void prinTSubHead(){
     mostrarStart();
@@ -192,17 +203,34 @@ public class SubTramaParam implements SubTrama{
     
      @Override
     public String joinHeader() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String cad=new String();
+        for(int i=0;i<start.length;i++){
+            cad=cad.concat(String.format("%01X",start[i]));
+        }
+        for(int i=0;i<end.length;i++){
+            cad=cad.concat(String.format("%01X",end[i]));
+        }
+        return String.valueOf(Integer.parseInt(cad, 16));
     }
 
     @Override
     public int sizePSubtram() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+         String var=new String();
+         for(int i=0;i<size.length;i++){
+        var=var.concat(String.format("%02X",size[i]));
+         }
+        return Integer.parseInt(var, 16);
     }
 
+    /**
+     * 
+     * retorna la cantidad de bytes a los cuales corresponde a los bytes que
+     * componen el inico de la subtrama
+     * @return un entero
+     */
     @Override
     public int sizeSub() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return start.length+end.length+size.length;
     }
 }
 

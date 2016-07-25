@@ -11,7 +11,6 @@ import java.util.Date;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import javafx.util.converter.LocalDateTimeStringConverter;
 import javax.swing.JOptionPane;
 import org.jnetpcap.*;
 import org.jnetpcap.packet.format.FormatUtils;
@@ -263,7 +262,25 @@ public class CapturaRed extends Thread{
                                    //}else{
                                    //band2Pa=true;
                                    //}
-                                   crearPacketParam(tama, packetDat);
+                                  int ind=crearPacketParam(tama, packetDat);
+                                  if(ind<packetDat.size()){
+                                      tama=contarAlarmPacket1(packetDat);
+                                      int tam1=contarAlarmPacket2(packetDat);
+                                       if(tama>0&&tam1>0){
+                                           //enviar los valores 
+                                          System.out.println("esta aqui1*/*/**?¡?¡?¡?¡?¡/*/-*/-/-+++++valo"+tama+" */-/-*-"+tam1);
+                                          crearPacketAlar(tama, packetDat,1);
+                                          System.out.println("esta aqu2*/*/**?¡?¡?¡?¡?¡/*/-*/-/-+++++valo"+ind+" */-/-*-"+packetDat.size());
+                                          crearPacketAlar(tam1, packetDat,2);
+                                           //cargando primero los fisiologicos y despues  los de sistema
+                                    }else{
+                                           if(tama>0){
+                                          crearPacketAlar(tama, packetDat,1);
+                                           }else if(tam1>0){
+                                            crearPacketAlar(tam1, packetDat,2);
+                                           }
+                                       }
+                                  }
                                  }
                                }
                            }  
@@ -283,8 +300,7 @@ public class CapturaRed extends Thread{
            pcap.loop(Pcap.LOOP_INFINITE, jpacketHandler, "useiro Yo");
            pcap.close();     
      }
-      
-      
+       
        
        
        
@@ -292,11 +308,41 @@ public class CapturaRed extends Thread{
        
        
        /**
+        * permite cargar los paquetes de alarma fisiologico
+        * @param cant
+        * @param datas
+        * @return 
+        */
+       private int crearPacketAlar(int cant, ArrayList datas,int tipo){
+           int pos=0;
+           for(int i=0;i<cant&&pos<datas.size();i++){
+               byte []code2=null;
+               byte []code1=null;
+               byte []const1=null;
+               Header head =new Header(code2,code1,const1);
+               MindrayAlarma ma=new MindrayAlarma();
+               ma.setFecha(fecha);
+               ma.setHora(Hora);
+               ma.setHeader(head);
+               ma.setFuente(ip1);
+               ma.setTip(tipo);
+               pos=ma.clasifydata(datas, pos);
+               synchronized(packets){
+               packets.add(ma);
+               packets.notify();
+               }   
+           }
+           return pos;
+       }
+      
+       
+       
+       /**
         * 
         * @param cant
         * @param datas 
         */
-       public void crearPacketParam(int cant,ArrayList datas){
+       public int crearPacketParam(int cant,ArrayList datas){
            int pos=0;
            for(int i=0;i<cant-1&&pos<datas.size();i++){
            byte []code2=null;
@@ -317,19 +363,116 @@ public class CapturaRed extends Thread{
            packets.notify();
             }
            }
+           return pos;
        }
+       
+       
+       public int contarAlarmPacket2(ArrayList datas){
+       String val="1505400";
+       String cad=new String();
+        int sali=0,valor;
+        for(int i=0;i<datas.size();i++){ 
+            valor=Byte.toUnsignedInt((byte)datas.get(i));
+            if(valor>9){
+               ArrayList lista=descomposeNum(valor);
+                for(int x=lista.size()-1;x>=0;x--){
+                    cad=cad.concat(String.valueOf((int)lista.get(x)));
+                   if(cad.length()==val.length()){
+                   if(cad.equals(val)){
+                      sali++;
+                      String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       cad=cad1;
+                   }else{
+                       String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       cad=cad1;
+                 }
+               }       
+             }   
+            }else{
+               cad=cad.concat(String.valueOf(Byte.toUnsignedInt((byte)datas.get(i))));
+               if(cad.length()==val.length()){
+                   if(cad.equals(val)){
+                       sali++;
+                       //System.out.println("Exito");
+                        String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       cad=cad1;
+                   }else{
+                       String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       cad=cad1;
+                 }
+               }
+            }
+        }
+       return sali;
+       }
+       
+       
+       
        
        /**
         * 
         */
-       public int contarAlarmPacket(){
-       String val="15020400";
-       String val1="1503800";
-       String val2="1503600";
+       public int contarAlarmPacket1(ArrayList datas){
+       String val="1505600";
        String cad=new String();
-       
-       
-       return 0;
+        int sali=0,valor;
+        for(int i=0;i<datas.size();i++){ 
+            valor=Byte.toUnsignedInt((byte)datas.get(i));
+            if(valor>9){
+               ArrayList lista=descomposeNum(valor);
+                for(int x=lista.size()-1;x>=0;x--){
+                    cad=cad.concat(String.valueOf((int)lista.get(x)));
+                   if(cad.length()==val.length()){
+                   if(cad.equals(val)){
+                      sali++;
+                      String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       cad=cad1;
+                   }else{
+                       String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       cad=cad1;
+                 }
+               }       
+             }   
+            }else{
+               cad=cad.concat(String.valueOf(Byte.toUnsignedInt((byte)datas.get(i))));
+               if(cad.length()==val.length()){
+                   if(cad.equals(val)){
+                       sali++;
+                       //System.out.println("Exito");
+                        String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       cad=cad1;
+                   }else{
+                       String cad1=new String();
+                       for(int p=1;p<cad.length();p++){
+                           cad1+=cad.charAt(p);
+                        }
+                       cad=cad1;
+                 }
+               }
+            }
+        }
+       return sali;
        }
        
        

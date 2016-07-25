@@ -8,19 +8,23 @@ package Vista;
 
 
 import Controlador.ControladorCapRed;
+import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import snifer2.MindrayAlarma;
 import snifer2.MindrayPacket;
 import snifer2.MindrayParametros;
 import snifer2.SubTramaArt_AP;
 import snifer2.SubTramaECG;
 import snifer2.SubTramaImpedancia;
 import snifer2.SubTramaSpo2;
-import snifer2.SubtRamTemp;
 import snifer2.Trama;
 
 /**
@@ -34,6 +38,9 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
     private ArrayList<PanelVisual> panels;
     private JButton btn;
     private ControladorCapRed cpr;
+    private JPanel pan;
+    private JLabel lb;
+    
     
  
 
@@ -49,9 +56,16 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
           panels.add(pa);
           getContentPane().add(pa);
         }
+        pan=new JPanel();
+        lb=new JLabel();
         btn=new JButton("Salida");
         btn.addActionListener(this);
-        getContentPane().add(btn);
+        lb.setFont(new Font("Tahoma",1,60));
+        lb.setText("EMERGENCIA");
+        pan.setLayout(new BorderLayout());
+        pan.add(btn,BorderLayout.EAST);
+        pan.add(lb,BorderLayout.WEST);
+        getContentPane().add(pan);
     }
     
     public void ClasifiData(MindrayPacket mp){
@@ -195,6 +209,12 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
                 //System.out.println(mp.getFuente());
                 //System.out.println(ip+"la ip");
                 clasifiParame((MindrayParametros)mp);
+                }else if(mp.getClass().getSimpleName().equalsIgnoreCase("MindrayAlarma")){
+                    for(int i=0;i<((MindrayAlarma)mp).getSubTra().size();i++){
+                        if(((MindrayAlarma)mp).getSubTra().get(i).getMensajes()!=null){
+                            cargarAlar(((MindrayAlarma)mp).getSubTra().get(i).getMensajes().get(0));
+                        }
+                    }
                 }
               //}
             }
@@ -211,6 +231,11 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
         }while(true);
     }
 
+    public void cargarAlar(String Amla){
+        //llamar el metetodo dentro de la mismas clase
+    lb.setText(Amla);
+    }
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==btn){

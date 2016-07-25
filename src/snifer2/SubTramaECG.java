@@ -129,7 +129,7 @@ public class SubTramaECG extends SubTramaParam implements SubTraMetod {
         String val=null;
         val=String.format("%02X", data.get(post));
         val=val.concat(String.format("%02X", data.get(++post)));
-        System.out.println("cvp"+val);
+        //System.out.println("cvp"+val);
         CVP=Integer.parseInt(val,16);
         if(CVP>32768){
         CVP=(CVP-65536)/100;
@@ -143,7 +143,7 @@ public class SubTramaECG extends SubTramaParam implements SubTraMetod {
         String val=null;
         val=String.format("%02X", data.get(post));
         val=val.concat(String.format("%02X", data.get(++post)));
-        System.out.println("avr"+val);
+        //System.out.println("avr"+val);
         aVR=Integer.parseInt(val,16);
         if(aVR>32768){
         aVR=(aVR-65536)/100;
@@ -157,7 +157,7 @@ public class SubTramaECG extends SubTramaParam implements SubTraMetod {
         String val=null;
         val=String.format("%02X", data.get(post));
         val=val.concat(String.format("%02X", data.get(++post)));
-        System.out.println("avl"+val);
+        //System.out.println("avl"+val);
         aVL=Integer.parseInt(val,16);
         if(aVL>32768){
         aVL=(aVL-65536)/100;
@@ -170,7 +170,7 @@ public class SubTramaECG extends SubTramaParam implements SubTraMetod {
         String val=null;
         val=String.format("%02X", data.get(post));
         val=val.concat(String.format("%02X", data.get(++post)));
-       System.out.println("avf"+val);
+       //System.out.println("avf"+val);
         aVF=Integer.parseInt(val,16);
         if(aVF>32768){
         aVF=(aVF-65536)/100;
@@ -183,7 +183,7 @@ public class SubTramaECG extends SubTramaParam implements SubTraMetod {
         String val=null;
         val=String.format("%02X", data.get(post));
         val=val.concat(String.format("%02X", data.get(++post)));
-        System.out.println("V"+val);
+        //System.out.println("V"+val);
         V=Integer.parseInt(val, 16);
          if(V>32768){
         V=(V-65536)/100;
@@ -198,7 +198,7 @@ public class SubTramaECG extends SubTramaParam implements SubTraMetod {
         String val=null;
         val=String.format("%02X", data.get(post));
         val=val.concat(String.format("%02X", data.get(++post)));
-        System.out.println("III"+val);
+        //System.out.println("III"+val);
         III=Integer.parseInt(val,16);
          if(III>32768){
         III=(III-65536)/100;
@@ -213,7 +213,7 @@ public class SubTramaECG extends SubTramaParam implements SubTraMetod {
         String val=null;
         val=String.format("%02X", data.get(post));
         val=val.concat(String.format("%02X", data.get(++post)));
-        System.out.println("II"+val);
+        //System.out.println("II"+val);
         II=Integer.parseInt(val, 16);
          if(II>32768){
         II=(II-65536)/100;
@@ -229,7 +229,7 @@ public class SubTramaECG extends SubTramaParam implements SubTraMetod {
         String val=null;
         val=String.format("%02X", data.get(post));
         val=val.concat(String.format("%02X", data.get(++post)));
-        System.out.println("I"+val);
+        //System.out.println("I"+val);
         I=Integer.parseInt(val,16);
          if(I>32768){
         I=(I-65536)/100;
