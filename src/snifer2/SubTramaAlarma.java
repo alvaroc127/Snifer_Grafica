@@ -73,6 +73,7 @@ public class SubTramaAlarma  extends SubTramaParam {
         this.mensajes = mensajes;
     }
     
+   
     
     
     public int findCant(int post, ArrayList data){
@@ -110,9 +111,11 @@ public class SubTramaAlarma  extends SubTramaParam {
         int cont=0;
         for(int j=posI;j<array.size()&&cont<cant;j++){
                 this.getDatas().add(array.get(j));
+                System.out.printf("0x%02X",(byte)array.get(j));
                cont++;
                posI=j;
         }
+        System.out.println("");
         return posI;
     }
     
@@ -125,10 +128,10 @@ public class SubTramaAlarma  extends SubTramaParam {
         String mensaje="";
         char a;
         for(int i=0;i<cant;i++){ 
-            System.out.println("este es el tamaño de subtra "+tamSubtra());
+            //System.out.println("este es el tamaño de subtra "+tamSubtra());
             for(int j=0;j<this.tamSubtra();j++){
                 a=(char)Byte.toUnsignedInt((byte)datas.get(pos));
-                //System.out.print(a);
+                System.out.print(a);
                 mensaje+=a;
                 pos++;
             }
@@ -137,7 +140,7 @@ public class SubTramaAlarma  extends SubTramaParam {
                 pos=findTama(pos, datas);
             }
             mensajes.add(mensaje);
-            mensaje=null;
+            mensaje="";
         }
         return pos;
     }

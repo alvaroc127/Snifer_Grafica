@@ -13,6 +13,8 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Time;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -37,9 +39,10 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
     private String ip;
     private ArrayList<PanelVisual> panels;
     private JButton btn;
-    private ControladorCapRed cpr;
+    //private ControladorCapRed cpr;
     private JPanel pan;
     private JLabel lb;
+    private JLabel lb1;
     
     
  
@@ -56,15 +59,18 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
           panels.add(pa);
           getContentPane().add(pa);
         }
+         lb1=new JLabel();
+         lb1.setFont(new Font("Tahoma",1,30));
         pan=new JPanel();
         lb=new JLabel();
         btn=new JButton("Salida");
         btn.addActionListener(this);
-        lb.setFont(new Font("Tahoma",1,60));
+        lb.setFont(new Font("Tahoma",1,30));
         lb.setText("EMERGENCIA");
         pan.setLayout(new BorderLayout());
         pan.add(btn,BorderLayout.EAST);
-        pan.add(lb,BorderLayout.WEST);
+        pan.add(lb,BorderLayout.SOUTH);
+        pan.add(lb1,BorderLayout.NORTH);
         getContentPane().add(pan);
     }
     
@@ -79,12 +85,13 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
         final String h8="475251";
         final String h9="73746";
         for(int i=0;i<mp.getSubtramas().size();i++){
-            //System.out.println("\n valor subtrama :"+mp.getSubtramas().get(i).joinheader());
+            //System.out.println("\n valor subtrama :"+mp.getSubtramas().get(i).joinHeader());
             switch(mp.getSubtramas().get(i).joinHeader()){
                 case(h1):
                   panels.get(0).loadGrafic(mp.getSubtramas().get(i).getData());
                   panels.get(0).setVisible(true);
-                  //ControladorCapRed.inserBaseDat(001,mp.getSubtramas().get(i).combertByte(), mp.getSubtramas().get(i+1).combertByte(), mp.getSubtramas().get(i+2).combertByte());
+                  //System.out.println(mp.getHora());
+                  //ControladorCapRed.inserBaseDat(001,mp.getSubtramas().get(j).combertByte(), mp.getSubtramas().get(j+1).combertByte(), mp.getSubtramas().get(j+2).combertByte(),Time.valueOf(mp.getHora()));
                 break;
                         
                 case(h2):
@@ -129,6 +136,7 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
      if(mp.getSubtramaParam()!=null){
     switch(mp.getSubtramaParam().getClass().getSimpleName()){
                 case("SubTramaECG"):
+                    //System.out.println(((SubTramaECG)mp.getSubtramaParam()).getFrecuencia());
                 panels.get(0).cargaFrecuen(((SubTramaECG)mp.getSubtramaParam()).getFrecuencia());
                 panels.get(0).cargarMatriz(((SubTramaECG)mp.getSubtramaParam()).getI(), ((SubTramaECG)mp.getSubtramaParam()).getII(),((SubTramaECG)mp.getSubtramaParam()).getIII(),((SubTramaECG)mp.getSubtramaParam()).getaVR(),((SubTramaECG)mp.getSubtramaParam()).getaVL(),((SubTramaECG)mp.getSubtramaParam()).getaVF(),((SubTramaECG)mp.getSubtramaParam()).getV(),((SubTramaECG)mp.getSubtramaParam()).getCVP());
                 break;
@@ -179,30 +187,27 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
         this.panels = panels;
     }
 
-    public ControladorCapRed getCpr() {
-        return cpr;
-    }
 
-    public void setCpr(ControladorCapRed cpr) {
-        this.cpr = cpr;
-    }
     
     @Override
     public void run() {
         do{
-            //if(cpr!=null && ip!=null){
-            //if(cpr.isIp(ip)){
-               Trama mp=ControladorCapRed.Rpacket();
-                if(mp!=null){
-                // for(int i=0;i<tram.size();i++){
+            if(ip!=null){
+            if(ControladorCapRed.isIp(ip)){
+                System.out.println("esta para graficar");
+              // ArrayList<Trama> tram=ControladorCapRed.Rpacket();
+               // if(tram!=null){
+                    //System.out.println("tama"+tram.size());
+                 //for(int i=0;i<tram.size();i++){
+                      //System.out.println("inicio el hilo*/*/*/*/*/*/*/---+-+-+-+-+-+-"+tram.size());
                 //validar que tram diferente de NULL
-            //System.out.println("inicio el hilo");
-            //Trama mp= tram.get(i);//ControladorCapRed.Rpacket();
+            Trama mp=ControladorCapRed.Rpacket();
             if(mp!=null){
             if(mp.getClass().getSimpleName().equalsIgnoreCase("MindrayPacket")){
                 //System.out.println("pertenece");
                 //System.out.println(mp.getFuente());
                 //System.out.println(ip+"la ip");
+                
                ClasifiData((MindrayPacket)mp);
             }else if(mp.getClass().getSimpleName().equalsIgnoreCase("MindrayParametros")){
                 //System.out.println("pertenece1123443");
@@ -210,26 +215,26 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
                 //System.out.println(ip+"la ip");
                 clasifiParame((MindrayParametros)mp);
                 }else if(mp.getClass().getSimpleName().equalsIgnoreCase("MindrayAlarma")){
-                    for(int i=0;i<((MindrayAlarma)mp).getSubTra().size();i++){
-                        if(((MindrayAlarma)mp).getSubTra().get(i).getMensajes()!=null){
-                            cargarAlar(((MindrayAlarma)mp).getSubTra().get(i).getMensajes().get(0));
+                    for(int j=0;j<((MindrayAlarma)mp).getSubTra().size();j++){
+                        if(((MindrayAlarma)mp).getSubTra().get(j).getMensajes().isEmpty()==false){
+                            cargarAlar(((MindrayAlarma)mp).getSubTra().get(j).getMensajes().get(0));
+                            if(((MindrayAlarma)mp).getSubTra().get(j).getMensajes().get(0).charAt(0)=='*'&&((MindrayAlarma)mp).getSubTra().get(j).getMensajes().size()>=2){
+                                lb1.setText(((MindrayAlarma)mp).getSubTra().get(j).getMensajes().get(1));
+                               // System.out.println(((MindrayAlarma)mp).contarAsteris(((MindrayAlarma)mp).getSubTra().get(j).getMensajes().get(1)));
+                            }
                         }
                     }
                 }
-              //}
+              }
+            // }
+            //}else{
+                    //System.out.println("----tram---"+mp);
+                //}
+              }
             }
-           }else{
-                    System.out.println("----tram---"+mp);
-                }
-          //}else{
-            //System.out.println(" NO"   + ")(()()(Entro/*-**/--*/");
-            //}
-         // }else{
-              //  System.out.println("cpr o ip son null/*/*/*/*/*/*/");
-               // System.out.println(cpr+"%%&%&%&%&%&%&%&%&% esto es Ip "+ip);
-           // }
         }while(true);
     }
+        
 
     public void cargarAlar(String Amla){
         //llamar el metetodo dentro de la mismas clase
@@ -240,6 +245,6 @@ public class FrameVisual extends JFrame implements Runnable,ActionListener{
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==btn){
             this.setVisible(false);
+            }
         }
     }
-}

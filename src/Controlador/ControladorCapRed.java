@@ -6,9 +6,11 @@
 package Controlador;
 
 import BD.ECG_JDBC;
+import java.sql.Time;
 import java.util.ArrayList;
 import org.jnetpcap.PcapIf;
 import snifer2.CapturaRed;
+import snifer2.MindrayAlarma;
 import snifer2.MindrayPacket;
 import snifer2.MindrayParametros;
 import snifer2.Trama;
@@ -23,7 +25,7 @@ public class ControladorCapRed {
     private ArrayList<String> Ips;
     private ArrayList<String> dispostiRed;
     private static ECG_JDBC ecg_db;
-    private Trama packet;
+
 
     public ControladorCapRed(){
         capr=new CapturaRed();
@@ -64,10 +66,14 @@ public class ControladorCapRed {
     }
     
     public synchronized static Trama Rpacket(){
-       // ArrayList<Trama> trm=capr.returnPack();
-        //if(trm!=null){
-         //capr.getPackets().clear();
-        //}
+        /**
+        ArrayList<Trama> trm=(ArrayList<Trama>) capr.returnPack().clone();
+        if(trm!=null){
+            System.out.println("tama ANTES"+trm.size());
+         capr.getPackets().clear();
+         System.out.println("tama despues"+trm.size());
+        }
+        **/
     return capr.returnPack();
     }
     
@@ -75,6 +81,7 @@ public class ControladorCapRed {
         this.capr = capr;
         this.Ips = Ips;
     }
+    
     public void iniciarCapt(){
     capr.obteneDispo();
     capr.listarDispositivos();
@@ -110,22 +117,45 @@ public class ControladorCapRed {
     }
     
     
-    public static void inserBaseDat(int ide,byte[] ECG1,byte[] ECG2,byte[] ECG3){
-    ecg_db.insertarSe(ide, ECG1, ECG2, ECG3);
+    public static void inserBaseDat(int ide,byte[] ECG1,byte[] ECG2,byte[] ECG3,Time hora){
+    ecg_db.insertarSe(ide, ECG1, ECG2, ECG3,hora);
     }
     
     
-    public void loadPacket(){
-    packet=capr.packetValida();
-    }
+  
     
-    public synchronized boolean isIp(String ip){
-    loadPacket();
-    if(packet!= null&&packet.getClass().getSimpleName().equals("MindrayParametros")&&ip.equals(((MindrayParametros)packet).getFuente())){
-        return true;
-    }else{
-    return false;
-     }
+    public synchronized static boolean isIp(String ip){
+        boolean ban=false;
+     Trama packet=capr.packetValida();
+     if(packet!=null){
+     switch(packet.getClass().getSimpleName()){
+                                           case("MindrayAlarma"):
+                                               //System.out.println(packet.getClass().getSimpleName()+"1");
+                                               if(ip.equals(((MindrayAlarma)packet).getFuente())){
+                                               ban=true;
+                                               }
+                                            break;
+                                               
+                                            case("MindrayPacket"):
+                                                   //System.out.println(packet.getClass().getSimpleName()+"2");
+                                                    if(ip.equals(((MindrayPacket)packet).getFuente())){
+                                                    ban=true;
+                                                    }
+                                            break;
+                                                
+                                                
+                                            case("MindrayParametros"):
+                                                //System.out.println(packet.getClass().getSimpleName()+"3");
+                                                if(ip.equals(((MindrayParametros)packet).getFuente())){
+                                                    ban=true;
+                                                    }
+                                            break;
+                                           
+                                           }
+     }else{
+           System.out.println("destino null");  
+             }
+     return ban;
     }
 }
 

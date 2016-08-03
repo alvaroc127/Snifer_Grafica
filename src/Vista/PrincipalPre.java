@@ -157,7 +157,7 @@ public class PrincipalPre extends javax.swing.JFrame implements ActionListener{
             FrameVisual frv=new FrameVisual((String)jListaIps.getSelectedValue());
             Thread hilo=new Thread(frv);
             hilo.setPriority(Thread.MAX_PRIORITY);
-            frv.setCpr(ccapR);
+            //frv.setCpr(ccapR);
             hilo.start();
             frv.setVisible(true);
             frames.add(frv);

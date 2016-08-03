@@ -24,6 +24,7 @@ public class MindrayAlarma implements Trama{
     private int tam1;
 
     public MindrayAlarma() {
+        subTra=new ArrayList<SubTramaAlarma>();
     }
 
     public MindrayAlarma(Header header, ArrayList<SubTramaAlarma> subTra) {
@@ -79,6 +80,27 @@ public class MindrayAlarma implements Trama{
         this.tip = tip;
     }
 
+    public int getTam1() {
+        return tam1;
+    }
+
+    public void setTam1(int tam1) {
+        this.tam1 = tam1;
+    }
+    
+    
+    public int contarAsteris(String mensaje){
+    int cont=0;
+    for(int i=0;i<mensaje.length();i++){
+            if(mensaje.charAt(i)=='*'){
+              cont++;  
+            }
+        }
+    return cont;
+    }
+    
+    
+    
     
     
     @Override
@@ -97,13 +119,15 @@ public class MindrayAlarma implements Trama{
         pos=header.FindCrc(pos, data);
         ++pos;
         pos=header.Findlow_zer(pos, data);
-        header.printHeader();
+        //header.printHeader();
         int tam=header.sizePacket();
         tam1=header.cantSize();
         do{
-         System.out.println(tam+" esto es tam1 "+tam1);
+            System.out.println(tam+" antes esto es tam1 "+tam1);
         pos=cargarSubTram(data, pos);
+         System.out.println(tam+"  despues esto es tam1 "+tam1);
         }while(tam1<tam);
+        System.out.println("Salio1/*-");
         tam1=0;
         }
         return 0;
@@ -111,8 +135,6 @@ public class MindrayAlarma implements Trama{
 
     @Override
     public int cargarSubTram(ArrayList data, int pos) {
-        final String tip1="71936";
-        final String tip2="96512";
         byte start[]=new byte[2];
         byte end[]=new byte[3];
         byte size[]=new byte[2];
@@ -125,34 +147,48 @@ public class MindrayAlarma implements Trama{
         sba.prinTSubHead();
         int tam=sba.sizePSubtram();
         switch(sba.joinHeader()){
-        case(tip1):
-            System.out.println("entro12121212");
+        case("71936"):
+            //System.out.println("entro12121212");
             pos=sba.findCant(pos,data);
+            if(sba.canSubtra()>0){
             pos=sba.findTama(pos, data);
-            System.out.println(pos);
-            sba.prinCantTam();
+            //System.out.println(pos);
+            //sba.prinCantTam();
             sba.cargaMensaje(pos, data,sba.canSubtra());
-            if(sba.canSubtra()>1){
-            tam=tam-(sba.canSubtra()*2);
-            }else{
-                if(sba.canSubtra()==1){
-                    tam=tam-4;
-                }
-            }
-            pos=sba.addData(pos, tam, data);
+           // if(sba.canSubtra()>1){
+            // tam=tam-(sba.canSubtra()*2);
+            //}else{
+                //if(sba.canSubtra()==1){
+                    //tam=tam-4;
+              //  }
+            //}
+                System.out.println(tam);
+            pos=sba.addData(pos-4, tam, data);
+            /**
            if(sba.canSubtra()==1){
-                    tam1+=tam+4+sba.sizeSub();
+                    tam1+=tam+sba.sizeSub();
                 }else{
+           tam1+=tam+sba.sizeSub();
+           }
+           **/
+            System.out.println("tma 1:"+sba.tamSubtra()+"pos "+pos);
+            System.out.printf("0x%02X",(byte)data.get(pos));
+                System.out.println("+---------");
+            tam1+=tam+sba.sizeSub();
+           }else{
            tam1+=tam+sba.sizeSub();
            }
             //cargar mensajes
             break;
             
-        case(tip2):
+        case("96512"):
             System.out.println("entro343434");
            pos=sba.findCant(pos,data);
+           System.out.println(sba.canSubtra()+"CANTIADDAD");
+           if(sba.canSubtra()>0){
            pos=sba.findTama(pos, data);
            sba.cargaMensaje(pos, data, sba.canSubtra());
+           /**
            if(sba.canSubtra()>1){
             tam=tam-(sba.canSubtra()*2);
             }else{
@@ -160,20 +196,32 @@ public class MindrayAlarma implements Trama{
                     tam=tam-4;
                 }
             }
-           pos=sba.addData(pos, tam, data);
            if(sba.canSubtra()==1){
                     tam1+=tam+4+sba.sizeSub();
                 }else{
            tam1+=tam+sba.sizeSub();
            }
+           **/
+           pos=sba.addData(pos-4, tam, data);
+           System.out.println("tma 2:"+sba.tamSubtra()+"pos "+pos);
+           System.out.printf("0x%02X",(byte)data.get(pos));
+           System.out.println("-------"+(char)data.get(pos));
+           tam1+=tam+sba.sizeSub();
+            }else{
+           tam1+=tam+sba.sizeSub();
+           }
+           //si tiene y e
             //cargar mensajes
             break;
                 
         default:
+        System.out.println("tamaño _:"+tam);
         pos=sba.addData(pos, tam, data);
+        System.out.println("h-->"+data.get(pos));
         tam1+=tam+sba.sizeSub();
         break;
         }
+        subTra.add(sba);
         return ++pos;
     }
     
